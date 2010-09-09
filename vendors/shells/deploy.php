@@ -1,15 +1,15 @@
 <?php
 /**
-  * Deploy Shell
+  * Deploy Shell for AudiologyOnline Apps
   * 
   * For deploy to work you must have ssh2 installed on your machine
   * 
   * $ sudo apt-get install libssh2-1-dev libssh2-php
-  * $ php -m | grep 'ssh2'
-  *
   * OR
   * http://pecl.php.net/package/ssh2
-  *
+  * 
+  * Verify you have ssh2 installed by:
+  * $ php -m | grep 'ssh2'
   * You should see 'ssh2', if so, you're good to go!
   */
 class DeployShell extends Shell {
@@ -166,8 +166,12 @@ class DeployShell extends Shell {
     fclose($stream);
     fclose($errorStream);
     
+    //Show output or at least progress dots.
     if($this->verbose){
       $this->out($retval);
+    }
+    else {
+      echo '.';
     }
     
     return $retval;

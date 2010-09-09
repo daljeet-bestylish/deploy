@@ -34,17 +34,25 @@ class HhTask extends DeployShell {
     
     $git = $this->ssh_exec("git status");
     if(!$git){
+      $this->ssh_setpath("/var/www/deploy");
       $this->ssh_exec("git clone {$this->git} hh");
+      $this->ssh_setpath("/var/www/deploy/hh");
     }
     
+    $this->ssh_exec("git checkout master");
+    $this->ssh_exec("git pull");
     $this->ssh_exec("git submodule init");
     $this->ssh_exec("git submodule update");
+    
+    //Now checkout the tag we wanted.
     $this->ssh_exec("git checkout {$this->tag}");
     
     //TODO run migration plugin
+    //$this->ssh_exec("cd app && ./cake migration run all");
     
     $this->ssh_close();
     
+    $this->out();
     $this->out("Deploy Finished");
   }
   

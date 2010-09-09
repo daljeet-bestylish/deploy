@@ -21,25 +21,32 @@ class HhTask extends DeployShell {
     $this->out("Deploying {$this->name}...");
     $this->beforeDeploy();
     $this->deploy();
-    $this->migrate();
   }
   
   /**
-    * TODO, fill in this function to run any logic that this app needs
+    * fill in this function to run any logic that this app needs
     * to deploy the specific tag
     */
   function deploy(){
-    $result = shell_exec("ls -la");
-    debug($result);
+    $this->ssh_open("hhwww1.healthyhearing.com","cakedeployer","hHd3P10y");
+    $this->ssh_exec("mkdir /var/www/deploy");
+    $this->ssh_setpath("/var/www/deploy/hh");
+    
+    $git = $this->ssh_exec("git status");
+    if(!$git){
+      $this->ssh_exec("git clone {$this->git} hh");
+    }
+    
+    $this->ssh_exec("git submodule init");
+    $this->ssh_exec("git submodule update");
+    $this->ssh_exec("git checkout {$this->tag}");
+    
+    //TODO run migration plugin
+    
+    $this->ssh_close();
+    
+    $this->out("Deploy Finished");
   }
-  
-  /**
-    * TODO, fill in this function to run any logic that this app needs
-    * to migrate the database.
-    */
-  function migrate(){
-  }
-  
   
 }
 ?>

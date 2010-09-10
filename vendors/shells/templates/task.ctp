@@ -1,6 +1,6 @@
 <?php
 /**
- * Generate a deploy task for a new app.
+ * deploy task template
  */
 echo "<?php\n";
 ?>

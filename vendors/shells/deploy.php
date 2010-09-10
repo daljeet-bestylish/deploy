@@ -1,15 +1,24 @@
 <?php
 /**
   * Deploy Shell for AudiologyOnline Apps
+  *  
+  *  Example: cake deploy hh prod v1.0.1
+  *
+  * @version 1.0
+  * @author Nick Baker <nick@audiologyonline.com>
+  ***************************************
+  * Dependancies: ssh2
   * 
-  * For deploy to work you must have ssh2 installed on your machine
-  * 
-  * $ sudo apt-get install libssh2-1-dev libssh2-php
+  * $ sudo apt-get install libssh2-php
+  *
   * OR
+  *
   * http://pecl.php.net/package/ssh2
-  * 
+  *************************************** 
   * Verify you have ssh2 installed by:
+  *
   * $ php -m | grep 'ssh2'
+  *
   * You should see 'ssh2', if so, you're good to go!
   */
 class DeployShell extends Shell {
@@ -20,7 +29,7 @@ class DeployShell extends Shell {
   var $tasks = array('Hh');
   
   /**
-    * environment verbs
+    * environment verbs to directory names
     */
   var $environments = array(
     'prod'        => 'prod',
@@ -51,6 +60,7 @@ class DeployShell extends Shell {
   
   /**
     * Default action.
+    * @return void
     */
   function main(){
     $this->out("Deploy the parent app to production");
@@ -60,6 +70,7 @@ class DeployShell extends Shell {
   
   /**
     * Show the help menu
+    * @return void
     */
   function help(){
     $this->out("Deploy Help");
@@ -74,6 +85,7 @@ class DeployShell extends Shell {
   
   /**
     * Genearte a new app deploy task.
+    * @return void
     */
   function generate(){
     $app_name = array_shift($this->args);
@@ -105,6 +117,7 @@ class DeployShell extends Shell {
     * This is called from within each task to parse the args
     * - parse the args
     * - verify the tag
+    * @return void
     */
   function beforeDeploy(){
     if(empty($this->args)){
@@ -139,6 +152,7 @@ class DeployShell extends Shell {
   
   /**
     * Verify the tag exists.
+    * @return boolean true if the tag exists in the current git repository
     */
   function verifyTag(){
     return ($this->tag == trim(shell_exec("git tag | grep '{$this->tag}'")));
@@ -146,6 +160,11 @@ class DeployShell extends Shell {
   
   /**
     * Connect and authenticate to an ssh server
+    * @param string server to connec to
+    * @param string user to use to conenct to server with
+    * @param string password to use to conenct to server with
+    * @param string port to use to conenct to server with
+    * @return void
     */
   function ssh_open($server, $user, $pass, $port = 22){
     if(!function_exists("ssh2_connect")){
@@ -170,13 +189,10 @@ class DeployShell extends Shell {
   /**
     * Send and receive the result of an ssh command
     * @param string command to execute on remote server
-    * @param array of options
-    * - error: default false, if true, show stderr instead of stdout
-    * - verbose: default true, shows output as it happens.
     * @param boolean get stderr instead of stdout stream
     * @return mixed result of command.
     */
-  function ssh_exec($cmd, $options = array(), $error = false){
+  function ssh_exec($cmd, $error = false){
     if(!$this->connection){
       $this->__errorAndExit("No open connection detected.");
     }
@@ -216,6 +232,7 @@ class DeployShell extends Shell {
   /**
     * Set the path to append to each command.
     * @param string path (without cd)
+    * @return void
     */
   function ssh_setpath($path){
     $this->path = $path;
@@ -252,6 +269,7 @@ class DeployShell extends Shell {
   /**
     * Private method to output the error and exit(1)
     * @param string message to output
+    * @return void
     * @access private
     */
   function __errorAndExit($message){

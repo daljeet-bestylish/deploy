@@ -28,9 +28,30 @@ class HhTask extends DeployShell {
     * to deploy the specific tag
     */
   function deploy(){
+    $servers = array(
+      'hhwww1.healthyhearing.com',
+      'hhwww2.healthyhearing.com',
+    );
+    $user = 'cakedeployer';
+    $pass = 'hHd3P10y';
+    
+    foreach($servers as $server){
+      $this->ssh_open($server,$user,$pass);
+      $this->deployLogic();
+      $this->ssh_close();
+    }
+    
+    $this->out();
+    $this->out("Deploy Finished");
+  }
+  
+  /**
+    * Helper deploy logic for each server we're deploying too
+    */
+  function deployLogic(){
     $path = $this->environment;
     $path = 'deploy'; //For testing
-    $this->ssh_open("hhwww1.healthyhearing.com","cakedeployer","hHd3P10y");
+    
     $this->ssh_exec("mkdir /var/www/$path");
     $this->ssh_setpath("/var/www/$path/hh");
     
@@ -47,8 +68,8 @@ class HhTask extends DeployShell {
       $this->ssh_setpath("/var/www/$path/hh");
     }
     
-    $this->ssh_exec("git checkout master");
-    $this->ssh_exec("git pull");
+    //Update the repository
+    $this->ssh_exec("git pull origin master");
     $this->ssh_exec("git submodule init");
     $this->ssh_exec("git submodule update");
     
@@ -57,11 +78,6 @@ class HhTask extends DeployShell {
     
     //TODO run migration plugin
     //$this->ssh_exec("cd app && ./cake migration run all");
-    
-    $this->ssh_close();
-    
-    $this->out();
-    $this->out("Deploy Finished");
   }
   
 }

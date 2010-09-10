@@ -17,7 +17,7 @@ class DeployShell extends Shell {
   /**
     * Deployable apps, as tasks
     */
-  var $tasks = array('Hh');
+  var $tasks = array('Hh','Ao');
   
   /**
     * environment verbs
@@ -65,8 +65,40 @@ class DeployShell extends Shell {
     $this->out("Deploy Help");
     $this->hr();
     $this->out("Usage: cake deploy <app> <environment> <tag>");
+    $this->out("Usage: cake deploy generate <app>");
     $this->out("Examples:");
     $this->out("  cake deploy hh prod v1.2       Deploy HealthyHearing tag v1.2 to production");
+    $this->out("  cake deploy hh dev v1.2        Deploy HealthyHearing tag v1.2 to development");
+    $this->out("  cake deploy generate ao        Generate the AoTask to deploy the Ao App.");
+  }
+  
+  /**
+    * Genearte a new app deploy task.
+    */
+  function generate(){
+    $app_name = array_shift($this->args);
+    if(!$app_name){
+      $this->__errorAndExit("Please specify an app name to generate.  cake deploy generate <short_task_name>");
+    }
+    
+    $class = Inflector::classify($app_name);
+    $content = $this->__generateTemplate('task', array('class' => $class, 'name' => $app_name));
+    $file_name = dirname(__FILE__) . DS . 'tasks' . DS . Inflector::underscore($class) . '.php';
+    
+    
+    //Write the file
+    if(file_exists($file_name)){
+      $this->__errorAndExit("$app_name deploy task already exists.");
+    }
+    else {
+      $File = new File($file_name, true);
+      if($File->write($content)){
+        $this->out("$class generated.");
+      }
+      else {
+        $this->__errorAndExit("problem generating file, check permissions.");
+      }
+    }
   }
   
   /**
@@ -118,6 +150,10 @@ class DeployShell extends Shell {
   function ssh_open($server, $user, $pass, $port = 22){
     if(!function_exists("ssh2_connect")){
       $this->__errorAndExit("function ssh2_connect doesn't exit.  Run sudo apt-get install libssh2-1-dev libssh2-php");
+    }
+    
+    if($server == 'server.example.com'){
+      $this->__errorAndExit("Please fill in the deploy() function in your new app task");
     }
     
     $this->connection = ssh2_connect($server, $port);
@@ -195,10 +231,28 @@ class DeployShell extends Shell {
     unset($this->connection);
   }
   
+ /**
+   * Include and generate a template string based on a template file
+   *
+   * @param string $template Template file name
+   * @param array $vars List of variables to be used on tempalte
+   * @return string
+   * @access private
+   */
+ function __generateTemplate($template, $vars) {
+   extract($vars);
+   ob_start();
+   ob_implicit_flush(0);
+   include(dirname(__FILE__) . DS . 'templates' . DS . $template . '.ctp');
+   $content = ob_get_clean();
+   return $content;
+ }
+  
   
   /**
     * Private method to output the error and exit(1)
     * @param string message to output
+    * @access private
     */
   function __errorAndExit($message){
     $this->out("Error: $message");

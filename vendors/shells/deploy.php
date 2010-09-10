@@ -17,7 +17,7 @@ class DeployShell extends Shell {
   /**
     * Deployable apps, as tasks
     */
-  var $tasks = array('Hh','Ao');
+  var $tasks = array('Hh');
   
   /**
     * environment verbs

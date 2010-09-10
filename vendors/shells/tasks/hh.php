@@ -28,15 +28,23 @@ class HhTask extends DeployShell {
     * to deploy the specific tag
     */
   function deploy(){
+    $path = $this->environment;
+    $path = 'deploy'; //For testing
     $this->ssh_open("hhwww1.healthyhearing.com","cakedeployer","hHd3P10y");
-    $this->ssh_exec("mkdir /var/www/deploy");
-    $this->ssh_setpath("/var/www/deploy/hh");
+    $this->ssh_exec("mkdir /var/www/$path");
+    $this->ssh_setpath("/var/www/$path/hh");
     
     $git = $this->ssh_exec("git status");
     if(!$git){
-      $this->ssh_setpath("/var/www/deploy");
+      $this->ssh_setpath("/var/www/$path");
       $this->ssh_exec("git clone {$this->git} hh");
-      $this->ssh_setpath("/var/www/deploy/hh");
+      $this->ssh_exec("mkdir /var/www/$path/hh/app/tmp/cache");
+      $this->ssh_setpath("/var/www/$path/hh/app/tmp");
+      $this->ssh_exec("chmod 777 -R .");
+      $this->ssh_exec("mkdir /var/www/$path/hh/app/webroot/static");
+      $this->ssh_setpath("/var/www/$path/hh/app/webroot");
+      $this->ssh_exec("chmod 777 -R static");
+      $this->ssh_setpath("/var/www/$path/hh");
     }
     
     $this->ssh_exec("git checkout master");

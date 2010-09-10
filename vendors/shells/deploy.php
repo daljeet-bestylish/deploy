@@ -109,7 +109,7 @@ class DeployShell extends Shell {
     * Verify the tag exists.
     */
   function verifyTag(){
-    return ($this->tag == trim(shell_exec("git tag | sort -n | tail -1")));
+    return ($this->tag == trim(shell_exec("git tag | grep '{$this->tag}'")));
   }
   
   /**

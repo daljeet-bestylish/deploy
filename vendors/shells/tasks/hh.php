@@ -50,7 +50,6 @@ class HhTask extends DeployShell {
     */
   function deployLogic(){
     $path = $this->environment;
-    $path = 'deploy'; //For testing
     
     $this->ssh_exec("mkdir /var/www/$path");
     $this->ssh_setpath("/var/www/$path/hh");

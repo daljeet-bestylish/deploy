@@ -34,6 +34,7 @@ class DeployShell extends Shell {
   var $environments = array(
     'prod'        => 'prod',
     'production'  => 'prod',
+    'test'  => 'deploy',
     'dev'         => 'dev',
     'development' => 'dev',
   );

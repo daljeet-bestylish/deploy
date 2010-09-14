@@ -58,7 +58,7 @@ class HhTask extends DeployShell {
     if(!$git){
       $this->ssh_setpath("/var/www/$path");
       $this->ssh_exec("git clone {$this->git} hh");
-      $this->ssh_exec("mkdir /var/www/$path/hh/app/tmp/cache");
+      $this->ssh_exec("mkdir /var/www/$path/hh/app/tmp/cache/views");
       $this->ssh_setpath("/var/www/$path/hh/app/tmp");
       $this->ssh_exec("chmod 777 -R .");
       $this->ssh_exec("mkdir /var/www/$path/hh/app/webroot/static");

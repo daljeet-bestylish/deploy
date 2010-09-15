@@ -37,7 +37,7 @@ class HhTask extends DeployShell {
     
     foreach($servers as $server){
       $this->ssh_open($server,$user,$pass);
-      $this->deployLogic();
+      $this->deployLogic($server);
       $this->ssh_close();
     }
     
@@ -48,7 +48,7 @@ class HhTask extends DeployShell {
   /**
     * Helper deploy logic for each server we're deploying too
     */
-  function deployLogic(){
+  function deployLogic($server){
     $path = $this->environment;
     
     $this->ssh_exec("mkdir /var/www/$path");
@@ -75,8 +75,11 @@ class HhTask extends DeployShell {
     //Now checkout the tag we wanted.
     $this->ssh_exec("git checkout {$this->tag}");
     
-    //TODO run migration plugin
-    //$this->ssh_exec("cd app && ./cake migration run all");
+    //Only run migrations once
+    if($server == 'hhwww1.healthyhearing.com'){
+      $this->ssh_setpath("/var/www/$path/hh/app");
+      $this->ssh_exec("./cake migration run all");
+    }
   }
   
 }

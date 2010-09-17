@@ -35,8 +35,11 @@ class HhTask extends DeployShell {
     $user = 'cakedeployer';
     $pass = 'hHd3P10y';
     
+    $root_user = 'root';
+    $root_pass = '1qaz@WSX3ed';
+    
     foreach($servers as $server){
-      $this->ssh_open($server,$user,$pass);
+      $this->ssh_open($server,$root_user,$root_pass);
       $this->deployLogic($server);
       $this->ssh_close();
     }
@@ -66,6 +69,10 @@ class HhTask extends DeployShell {
       $this->ssh_exec("chmod 777 -R static");
       $this->ssh_setpath("/var/www/$path/hh");
     }
+    
+    //Restore rights to cakedeployer
+    $this->ssh_exec("chown -R cakedeployer:cakedeployer .");
+    $this->ssh_exec("su cakedeployer");
     
     //Update the repository
     $this->ssh_exec("git pull origin master");

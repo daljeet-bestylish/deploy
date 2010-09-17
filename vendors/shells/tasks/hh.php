@@ -89,6 +89,9 @@ class HhTask extends DeployShell {
       $this->ssh_setpath("/var/www/$path/hh/app");
       $this->ssh_exec("./cake migration run all");
     }
+    
+    //Finally clear the cache
+    $this->ssh_exec("./app/scripts/clear_cache");
   }
   
 }

@@ -77,10 +77,12 @@ class HhTask extends DeployShell {
     //Update the repository
     $this->ssh_exec("git pull origin master");
     $this->ssh_exec("git submodule init");
-    $this->ssh_exec("git submodule update");
     
     //Now checkout the tag we wanted.
     $this->ssh_exec("git checkout {$this->tag}");
+        
+    //Updated submodules to match checked out tag
+    $this->ssh_exec("git submodule update");
     
     //Only run migrations once
     if($server == 'hhwww1.healthyhearing.com'){

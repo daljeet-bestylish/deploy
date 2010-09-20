@@ -71,11 +71,9 @@ class HhTask extends DeployShell {
     }
     
     //Restore rights to cakedeployer
-    $this->ssh_exec("chown -R cakedeployer:cakedeployer .");
-    $this->ssh_exec("su cakedeployer");
     
     //Update the repository
-    $this->ssh_exec("git pull origin master");
+    $this->ssh_exec("git pull origin master --tags");
     $this->ssh_exec("git submodule init");
     
     //Now checkout the tag we wanted.
@@ -84,14 +82,17 @@ class HhTask extends DeployShell {
     //Updated submodules to match checked out tag
     $this->ssh_exec("git submodule update");
     
+    //Give it to cakedeployer
+    $this->ssh_exec("chown -R cakedeployer:cakedeployer .");
+    
+    //Finally clear the cache
+    $this->ssh_exec("./app/scripts/clear_cache");
+    
     //Only run migrations once
     if($server == 'hhwww1.healthyhearing.com'){
       $this->ssh_setpath("/var/www/$path/hh/app");
       $this->ssh_exec("./cake migration run all");
     }
-    
-    //Finally clear the cache
-    $this->ssh_exec("./app/scripts/clear_cache");
   }
   
 }

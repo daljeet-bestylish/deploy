@@ -73,7 +73,8 @@ class HhTask extends DeployShell {
     //Restore rights to cakedeployer
     
     //Update the repository
-    $this->ssh_exec("git pull origin master --tags");
+    $this->ssh_exec("git pull origin master");
+    $this->ssh_exec("git fetch --tags");
     $this->ssh_exec("git submodule init");
     
     //Now checkout the tag we wanted.

@@ -201,7 +201,9 @@ class DeployShell extends Shell {
     if($this->path){
       $cmd = "cd {$this->path} && $cmd";
     }
-    
+    if($this->verbose){
+      $this->out($cmd);
+    }
     $stream = ssh2_exec($this->connection, $cmd);
     
     if(!$stream){

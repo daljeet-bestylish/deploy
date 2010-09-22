@@ -69,9 +69,7 @@ class HhTask extends DeployShell {
       $this->ssh_exec("chmod 777 -R static");
       $this->ssh_setpath("/var/www/$path/hh");
     }
-    
-    //Restore rights to cakedeployer
-    
+        
     //Update the repository
     $this->ssh_exec("git pull origin master");
     $this->ssh_exec("git fetch --tags");

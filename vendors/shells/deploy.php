@@ -246,7 +246,7 @@ class DeployShell extends Shell {
     if($this->connection){
       $this->ssh_exec("exit");
     }
-    unset($this->connection);
+    $this->connection = null;
   }
   
  /**

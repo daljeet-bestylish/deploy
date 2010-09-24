@@ -21,12 +21,13 @@
   *
   * You should see 'ssh2', if so, you're good to go!
   */
+App::import('Core','Folder');
 class DeployShell extends Shell {
   
   /**
-    * Deployable apps, as tasks
+    * Deployable apps, as tasks, this is dynamically loaded
     */
-  var $tasks = array('Hh');
+  var $tasks = array();
   
   /**
     * environment verbs to directory names
@@ -58,6 +59,18 @@ class DeployShell extends Shell {
     * Path to work in
     */
   var $path = null;
+  
+  /**
+    * Dynamically load all tasks that are in the deploy/shell/tasks directory
+    */
+  function initialize(){
+    $this->Folder = new Folder();
+    $this->Folder->cd(dirname(__FILE__) . DS . 'tasks');
+    foreach($this->Folder->find() as $task){
+      $this->tasks[] = Inflector::camelize(str_replace(".php", "", $task));
+    }
+    parent::initialize();
+  }
   
   /**
     * Default action.

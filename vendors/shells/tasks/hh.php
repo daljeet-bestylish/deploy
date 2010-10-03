@@ -90,7 +90,7 @@ class HhTask extends DeployShell {
     //Only run migrations once
     if($server == 'hhwww1.healthyhearing.com'){
       $this->ssh_setpath("/var/www/$path/hh/app");
-      $this->ssh_exec("./cake migration run all");
+      $this->ssh_exec("HTTP_HOST=prod ./cake migration run all");
     }
   }
   

@@ -71,7 +71,8 @@ class HhTask extends DeployShell {
     }
         
     //Update the repository
-    $this->ssh_exec("git pull origin master");
+    $this->ssh_exec("git checkout master");
+    $this->ssh_exec("git pull");
     $this->ssh_exec("git fetch --tags");
     $this->ssh_exec("git submodule init");
     

@@ -18,7 +18,7 @@ Send tags out (push tags)
 
 h2. Deploy to pull new tag onto server
 
-cake deploy <app> <environment> <tag>
+cake deploy &lt;app&gt; &lt;environment&gt; &lt;tag&gt;
 
 @$cake deploy hh prod v1.12.20@
 

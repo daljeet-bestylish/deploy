@@ -1,0 +1,29 @@
+Deploy plugin to deploy applicaitons.
+
+"Documentation on Plugin":https://docs0.google.com/a/audiologyholdings.com/document/d/1CfftHU1--MkT1128IinrrwPSud5y-w-tHOKQ7FyuXm8/edit?hl=en#
+
+h2. Git create tag
+
+List tags, to ensure you create the correct tag
+
+@$ git tag -ln@
+
+Create tag
+
+@$ git tag -a "v1.13.20" -m "custom message"@
+
+Send tags out (push tags)
+
+@$ git push --tags@
+
+h2. Deploy to pull new tag onto server
+
+cake deploy <app> <environment> <tag>
+
+@$cake deploy hh prod v1.12.20@
+
+h2. Cleanup, deleting old tags
+
+@$ git tag -d v1.12.19@
+
+@$ git push origin :v1.12.19@

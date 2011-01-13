@@ -95,6 +95,9 @@ class DeployShell extends Shell {
     $this->out("  cake deploy hh prod v1.2       Deploy HealthyHearing tag v1.2 to production");
     $this->out("  cake deploy hh dev v1.2        Deploy HealthyHearing tag v1.2 to development");
     $this->out("  cake deploy generate ao        Generate the AoTask to deploy the Ao App.");
+    $this->out("  cake deploy tags               List the tags (git shortcut).");
+    $this->out("  cake deploy tag                Create the new tag, auto assigns tag (git shortcut).");
+    $this->out("  cake deploy tag v1.2           Create the new tag (git shortcut).");
   }
   
   /**
@@ -125,6 +128,64 @@ class DeployShell extends Shell {
         $this->__errorAndExit("problem generating file, check permissions.");
       }
     }
+  }
+  
+  /**
+  * Lists existing tags
+  */
+  function tags(){
+  	  $this->out("Existing Tags:");  
+  	  $this->out(trim(shell_exec("git tag -ln")));
+  	  $this->out();
+  }
+  /**
+  * create a new tag
+  */
+  function tag(){
+  	  if (empty($this->args)) {
+  	  	  // nothing entered... lets prompt for auto-tag completion
+  	  	  $this->tags();
+  	  	  $lastTag = array_pop(explode("\n", trim(shell_exec("git tag"))));
+  	  	  if (!empty($lastTag)) {
+  	  	  	  $lastTagParts = explode(".", $lastTag);
+  	  	  	  $lastTagSuffix = array_pop($lastTagParts);
+  	  	  	  if (is_numeric($lastTagSuffix)) {
+  	  	  	  	  $lastTagSuffix++;
+  	  	  	  	  $newTag = implode('.', $lastTagParts).".{$lastTagSuffix}";  
+  	  	  	  }
+  	  	  	  $this->out("Would you like this as your tag: {$newTag}");
+  	  	  	  $yes_no = trim(strtolower($this->in("Y/n/q")));
+  	  	  	  if ($yes_no=='q') {
+  	  	  	  	  $this->out("bye");
+  	  	  	  	  exit;
+  	  	  	  } elseif ($yes_no=='y') {
+  	  	  	  	  $tag = $newTag;
+  	  	  	  	  $this->out("tag assinged: {$tag}");
+  	  	  	  }
+  	  	  } else {
+  	  	  	  $tag = trim(array_shift($this->args));
+  	  	  }
+  	  }
+  	  while (empty($tag)) {
+  	  	  $tag = trim($this->in("Enter your tag"));
+  	  }
+  	  if (empty($tag)) {
+  	  	  $this->out("Are you sure this is your tag: {$tag}");
+  	  	  $yes_no = trim(strtolower($this->in("Y/n/q")));
+  	  	  if ($yes_no=='q') {
+  	  	  	  $this->out("bye");
+  	  	  	  exit;
+  	  	  } elseif ($yes_no=='n') {
+  	  	  	  $this->args = array();
+  	  	  	  return $this->tag();
+  	  	  }
+  	  }
+  	  $this->out(shell_exec("git tag -a '{$tag}' -m 'Deploy Script Added Tag {$tag}'"));
+  	  $this->out("Want to push your tags?");
+	  $yes_no = trim(strtolower($this->in("Y/n/q")));
+	  if ($yes_no=='y') {
+	  	  $this->out(shell_exec("git push --tags"));
+	  }
   }
   
   /**

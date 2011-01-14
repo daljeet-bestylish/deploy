@@ -80,7 +80,7 @@ class HhTask extends DeployShell {
     $this->ssh_exec("git submodule update");
     
     //Give it to cakedeployer
-    $this->ssh_exec("chown -R cakedeployer:cakedeployer .");
+    $this->ssh_exec("chown -R cakedeployer:www-data .");
     
     //Finally clear the cache
     $this->ssh_exec("./app/scripts/clear_cache");

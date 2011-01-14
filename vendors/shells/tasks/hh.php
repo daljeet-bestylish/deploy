@@ -35,11 +35,8 @@ class HhTask extends DeployShell {
     $user = 'cakedeployer';
     $pass = 'hHd3P10y';
     
-    $root_user = 'root';
-    $root_pass = '1qaz@WSX3ed';
-    
     foreach($servers as $server){
-      $this->ssh_open($server,$root_user,$root_pass);
+      $this->ssh_open($server,$user,$pass);
       $this->deployLogic($server);
       $this->ssh_close();
     }

@@ -2,7 +2,11 @@ Deploy plugin to deploy applicaitons.
 
 "Documentation on Plugin":https://docs0.google.com/a/audiologyholdings.com/document/d/1CfftHU1--MkT1128IinrrwPSud5y-w-tHOKQ7FyuXm8/edit?hl=en#
 
-h2. Git create tag
+h2. Create tag
+
+@$ cake deploy tag
+
+h3 OR
 
 List tags, to ensure you create the correct tag
 
@@ -23,6 +27,10 @@ cake deploy &lt;app&gt; &lt;environment&gt; &lt;tag&gt;
 @$cake deploy hh prod v1.12.20@
 
 h2. Cleanup, deleting old tags
+
+@$ cake deploy delete_tag v1.12.19
+
+h3 OR
 
 @$ git tag -d v1.12.19@
 

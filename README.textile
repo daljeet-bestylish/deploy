@@ -4,9 +4,9 @@ Deploy plugin to deploy applicaitons.
 
 h2. Create tag
 
-@$ cake deploy tag
+@$ cake deploy tag@
 
-h3 OR
+h3. OR
 
 List tags, to ensure you create the correct tag
 
@@ -28,9 +28,9 @@ cake deploy &lt;app&gt; &lt;environment&gt; &lt;tag&gt;
 
 h2. Cleanup, deleting old tags
 
-@$ cake deploy delete_tag v1.12.19
+@$ cake deploy delete_tag v1.12.19@
 
-h3 OR
+h3. OR
 
 @$ git tag -d v1.12.19@
 

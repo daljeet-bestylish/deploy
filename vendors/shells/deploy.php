@@ -98,6 +98,7 @@ class DeployShell extends Shell {
     $this->out("  cake deploy tags               List the tags (git shortcut).");
     $this->out("  cake deploy tag                Create the new tag, auto assigns tag (git shortcut).");
     $this->out("  cake deploy tag v1.2           Create the new tag (git shortcut).");
+    $this->out("  cake deploy delete_tag v1.2    Deletes local and remote copy of tag (git shortcut).");
   }
   
   /**
@@ -131,6 +132,31 @@ class DeployShell extends Shell {
   }
   
   /**
+  	* Delete the inputed tag from local and remote
+  	*/
+  function delete_tag(){
+  	if(empty($this->args)){
+  		$this->out("No specified to delete.");
+  		$this->tags();
+  		exit(1);
+  	}
+  	
+  	$this->tag = array_pop($this->args);
+  	if(!$this->verifyTag()){
+  		$this->out("Tag does not exist.");
+  		$this->tags();
+  		exit(1);
+  	}
+  	
+  	switch($this->promptYesNo("Are you sure you want to delete {$this->tag }?")){
+  		case 'y':
+  			$this->out(shell_exec("git tag -d {$this->tag}"));
+  			$this->out(shell_exec("git push origin :{$this->tag}"));
+  			break;
+  	}
+  }
+  
+  /**
   * Lists existing tags
   */
   function tags(){
@@ -142,50 +168,63 @@ class DeployShell extends Shell {
   * create a new tag
   */
   function tag(){
-  	  if (empty($this->args)) {
-  	  	  // nothing entered... lets prompt for auto-tag completion
-  	  	  $this->tags();
-  	  	  $lastTag = array_pop(explode("\n", trim(shell_exec("git tag"))));
-  	  	  if (!empty($lastTag)) {
-  	  	  	  $lastTagParts = explode(".", $lastTag);
-  	  	  	  $lastTagSuffix = array_pop($lastTagParts);
-  	  	  	  if (is_numeric($lastTagSuffix)) {
-  	  	  	  	  $lastTagSuffix++;
-  	  	  	  	  $newTag = implode('.', $lastTagParts).".{$lastTagSuffix}";  
-  	  	  	  }
-  	  	  	  $this->out("Would you like this as your tag: {$newTag}");
-  	  	  	  $yes_no = trim(strtolower($this->in("Y/n/q")));
-  	  	  	  if ($yes_no=='q') {
-  	  	  	  	  $this->out("bye");
-  	  	  	  	  exit;
-  	  	  	  } elseif ($yes_no=='y') {
-  	  	  	  	  $tag = $newTag;
-  	  	  	  	  $this->out("tag assinged: {$tag}");
-  	  	  	  }
-  	  	  } else {
-  	  	  	  $tag = trim(array_shift($this->args));
-  	  	  }
-  	  }
-  	  while (empty($tag)) {
-  	  	  $tag = trim($this->in("Enter your tag"));
-  	  }
-  	  if (empty($tag)) {
-  	  	  $this->out("Are you sure this is your tag: {$tag}");
-  	  	  $yes_no = trim(strtolower($this->in("Y/n/q")));
-  	  	  if ($yes_no=='q') {
-  	  	  	  $this->out("bye");
-  	  	  	  exit;
-  	  	  } elseif ($yes_no=='n') {
-  	  	  	  $this->args = array();
-  	  	  	  return $this->tag();
-  	  	  }
-  	  }
-  	  $this->out(shell_exec("git tag -a '{$tag}' -m 'Deploy Script Added Tag {$tag}'"));
-  	  $this->out("Want to push your tags?");
-	  $yes_no = trim(strtolower($this->in("Y/n/q")));
-	  if ($yes_no=='y') {
-	  	  $this->out(shell_exec("git push --tags"));
-	  }
+  	if (empty($this->args)) {
+  		// nothing entered... lets prompt for auto-tag completion
+  		$this->tags();
+  		$lastTag = array_pop(explode("\n", trim(shell_exec("git tag"))));
+  		if (!empty($lastTag)) {
+  			$lastTagParts = explode(".", $lastTag);
+  			$lastTagSuffix = array_pop($lastTagParts);
+  			if (is_numeric($lastTagSuffix)) {
+  				$lastTagSuffix++;
+  				$newTag = implode('.', $lastTagParts).".{$lastTagSuffix}";  
+  			}
+  			//Suggest tag
+  			switch($this->promptYesNo("Would you like this as your tag: $newTag")){
+  				case 'q':
+  					$this->out("bye");
+  					exit(1);
+  				case 'y':
+  					$tag = $newTag;
+  					$this->out("tag assinged: {$tag}");
+  					break;
+  			}
+  		} else {
+  			$tag = trim(array_shift($this->args));
+  		}
+  	}
+  	while (empty($tag)) {
+  		$tag = trim($this->in("Enter your tag"));
+  	}
+  	if (empty($tag)) {
+  		//Are you sure this is your tag?
+  		switch($this->promptYesNo("Are you sure this is your tag: $tag")){
+  			case 'n':
+  				$this->args = array();
+  				return $this->tag();
+  			case 'q':
+  				$this->out('bye');
+  				exit(1);
+  		}
+  	}
+  	$this->out(shell_exec("git tag -a '{$tag}' -m 'Deploy Script Added Tag {$tag}'"));
+  	
+  	//Push tags?
+  	switch($this->promptYesNo("Want to push your tags?")){
+  		case 'y':
+  			$this->out(shell_exec("git push --tags"));
+  			break;
+  	}
+  }
+  
+  /**
+  	* Prompt the user with a yes no question
+  	* @param string text
+  	* @param string default answer
+  	* @return result strlowered
+  	*/
+  private function promptYesNo($text, $default = "Y"){
+  	return trim(strtolower($this->in($text,array('Y','n','q'), $default)));
   }
   
   /**

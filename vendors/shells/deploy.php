@@ -136,14 +136,14 @@ class DeployShell extends Shell {
   	*/
   function delete_tag(){
   	if(empty($this->args)){
-  		$this->out("No specified to delete.");
+  		$this->out("No tag specified to delete.");
   		$this->tags();
   		exit(1);
   	}
   	
   	$this->tag = array_pop($this->args);
   	if(!$this->verifyTag()){
-  		$this->out("Tag does not exist.");
+  		$this->out("{$this->tag} does not exist.");
   		$this->tags();
   		exit(1);
   	}

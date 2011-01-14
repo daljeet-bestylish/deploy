@@ -132,8 +132,8 @@ class DeployShell extends Shell {
   }
   
   /**
-  	* Delete the inputed tag from local and remote
-  	*/
+  * Delete the inputed tag from local and remote
+  */
   function delete_tag(){
   	if(empty($this->args)){
   		$this->out("No tag specified to delete.");

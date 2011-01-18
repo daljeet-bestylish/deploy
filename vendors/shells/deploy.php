@@ -193,12 +193,12 @@ class DeployShell extends Shell {
   	} 
   	else {
   		$tag = trim(array_shift($this->args));
-  		$message = empty($this->args) ? "Deploy Script Added Tag {$tag}" : array_shift($this->args);
   	}
   	while (empty($tag)) {
   		$tag = trim($this->in("Enter your tag"));
   	}
   	if (!empty($tag)) {
+  		$message = empty($this->args) ? "Deploy Script Added Tag {$tag}" : array_shift($this->args);
   		//Are you sure this is your tag?
   		switch($this->promptYesNo("Are you sure this is your tag with message: $tag '$message'")){
   			case 'n':

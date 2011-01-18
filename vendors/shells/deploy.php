@@ -189,16 +189,18 @@ class DeployShell extends Shell {
   					$this->out("tag assinged: {$tag}");
   					break;
   			}
-  		} else {
-  			$tag = trim(array_shift($this->args));
   		}
+  	} 
+  	else {
+  		$tag = trim(array_shift($this->args));
+  		$message = empty($this->args) ? "Deploy Script Added Tag {$tag}" : array_shift($this->args);
   	}
   	while (empty($tag)) {
   		$tag = trim($this->in("Enter your tag"));
   	}
-  	if (empty($tag)) {
+  	if (!empty($tag)) {
   		//Are you sure this is your tag?
-  		switch($this->promptYesNo("Are you sure this is your tag: $tag")){
+  		switch($this->promptYesNo("Are you sure this is your tag with message: $tag '$message'")){
   			case 'n':
   				$this->args = array();
   				return $this->tag();
@@ -207,7 +209,7 @@ class DeployShell extends Shell {
   				exit(1);
   		}
   	}
-  	$this->out(shell_exec("git tag -a '{$tag}' -m 'Deploy Script Added Tag {$tag}'"));
+  	$this->out(shell_exec("git tag -a '{$tag}' -m '$message'"));
   	
   	//Push tags?
   	switch($this->promptYesNo("Want to push your tags?")){

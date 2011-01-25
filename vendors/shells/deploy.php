@@ -2,9 +2,9 @@
 /**
 * Deploy Shell for AudiologyOnline Apps
 *  
-*  Example: cake deploy hh prod v1.0.1
+*  Example: cake deploy app prod v1.0.1
 *
-* @version 1.0
+* @version 2.0
 * @author Nick Baker <nick@audiologyonline.com>
 ***************************************
 * Dependancies: ssh2
@@ -73,7 +73,7 @@ class DeployShell extends Shell {
 		$this->Folder = new Folder();
 		$this->Folder->cd($this->tasksPath);
 		foreach($this->Folder->find() as $task){
-			if(strpos($task, ".php")){
+			if($task == 'deploy_logic.php'){
 				$this->tasks[] = Inflector::camelize(str_replace(".php", "", $task));
 			}
 		}
@@ -91,23 +91,35 @@ class DeployShell extends Shell {
 	}
 	
 	/**
+	* Run the app task deploy
+	*/
+	function app(){
+		if(isset($this->DeployLogic)){
+			$this->DeployLogic->execute();
+		}
+		else {
+			$this->__errorAndExit("No Deploy Logic detected.  Please generate a deploy script by running\n\n cake deploy generate");
+		}
+	}
+	
+	/**
 	* Show the help menu
 	* @return void
 	*/
 	function help(){
 		$this->out("Deploy Help");
 		$this->hr();
-		$this->out("Usage: cake deploy <app> <environment> <tag>");
-		$this->out("Usage: cake deploy generate <app>");
+		$this->out("Usage: cake deploy app <environment> <tag>");
+		$this->out("Usage: cake deploy generate");
 		$this->out("Examples:");
-		$this->out("  cake deploy hh prod v1.2       Deploy HealthyHearing tag v1.2 to production");
-		$this->out("  cake deploy hh dev v1.2        Deploy HealthyHearing tag v1.2 to development");
-		$this->out("  cake deploy generate ao        Generate the AoTask to deploy the Ao App.");
-		$this->out("  cake deploy tags               List the tags (git shortcut).");
-		$this->out("  cake deploy tag                Create the new tag, auto assigns tag (git shortcut).");
-		$this->out("  cake deploy tag v1.2           Create the new tag (git shortcut).");
-		$this->out("  cake deploy delete_tag v1.2    Deletes local and remote copy of tag (git shortcut).");
-		$this->out("  cake deploy sync_tags          Sync local tags to remote tags (git shortcut).");
+		$this->out("  cake deploy app prod v1.2       Deploy HealthyHearing tag v1.2 to production");
+		$this->out("  cake deploy app dev v1.2        Deploy HealthyHearing tag v1.2 to development");
+		$this->out("  cake deploy generate            Generate the DeployLogicTask to deploy the App.");
+		$this->out("  cake deploy tags                List the tags (git shortcut).");
+		$this->out("  cake deploy tag                 Create the new tag, auto assigns tag (git shortcut).");
+		$this->out("  cake deploy tag v1.2            Create the new tag (git shortcut).");
+		$this->out("  cake deploy delete_tag v1.2     Deletes local and remote copy of tag (git shortcut).");
+		$this->out("  cake deploy sync_tags           Sync local tags to remote tags (git shortcut).");
 	}
 	
 	/**
@@ -115,11 +127,7 @@ class DeployShell extends Shell {
 	* @return void
 	*/
 	function generate(){
-		$app_name = array_shift($this->args);
-		if(!$app_name){
-			$this->__errorAndExit("Please specify an app name to generate.  cake deploy generate <short_task_name>");
-		}
-		
+		$app_name = 'deploy_logic';
 		$class = Inflector::classify($app_name);
 		$content = $this->__generateTemplate('task', array('class' => $class, 'name' => $app_name));
 		$file_name = $this->tasksPath . Inflector::underscore($class) . '.php';

@@ -132,10 +132,6 @@ class DeployShell extends Shell {
 		$content = $this->__generateTemplate('task', array('class' => $class, 'name' => $app_name));
 		$file_name = $this->tasksPath . Inflector::underscore($class) . '.php';
 		
-		$this->out($file_name);
-		exit();
-		
-		
 		//Write the file
 		if(file_exists($file_name)){
 			$this->__errorAndExit("$app_name deploy task already exists.");

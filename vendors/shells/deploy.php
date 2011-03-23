@@ -33,11 +33,13 @@ class DeployShell extends Shell {
 	* environment verbs to directory names
 	*/
 	var $environments = array(
-		'prod'        => 'prod',
-		'production'  => 'prod',
-		'test'  			=> 'deploy',
-		'dev'         => 'dev',
-		'development' => 'dev',
+		'prod'        	=> 'prod',
+		'production'  	=> 'prod',
+		'test'  		=> 'deploy',
+		'qa'         	=> 'qa',
+		'uat' 			=> 'qa',
+		'dev'         	=> 'dev',
+		'development' 	=> 'dev',
 	);
 	
 	/**
@@ -112,14 +114,19 @@ class DeployShell extends Shell {
 		$this->out("Usage: cake deploy app <environment> <tag>");
 		$this->out("Usage: cake deploy generate");
 		$this->out("Examples:");
-		$this->out("  cake deploy app prod v1.2       Deploy HealthyHearing tag v1.2 to production");
-		$this->out("  cake deploy app dev v1.2        Deploy HealthyHearing tag v1.2 to development");
-		$this->out("  cake deploy generate            Generate the DeployLogicTask to deploy the App.");
+		$this->out("  cake deploy app prod v1.2       Deploy 'this application' tag 'v1.2' to the 'production  environment'");
+		$this->out("  cake deploy app qa v1.2         Deploy 'this application' tag 'v1.2' to the 'QA environment'");
+		$this->out("  cake deploy app dev v1.2        Deploy 'this application' tag 'v1.2' to the 'development environment'");
 		$this->out("  cake deploy tags                List the tags (git shortcut).");
 		$this->out("  cake deploy tag                 Create the new tag, auto assigns tag (git shortcut).");
 		$this->out("  cake deploy tag v1.2            Create the new tag (git shortcut).");
 		$this->out("  cake deploy delete_tag v1.2     Deletes local and remote copy of tag (git shortcut).");
 		$this->out("  cake deploy sync_tags           Sync local tags to remote tags (git shortcut).");
+		$this->out("Get Started:");
+		$this->out("  cake deploy generate            Generate the DeployLogicTask to deploy the App.");
+		$this->out("                                  You will then need to edit and setup your deploy script.");
+		$this->tags();
+		
 	}
 	
 	/**
@@ -191,9 +198,25 @@ class DeployShell extends Shell {
 	/**
 	* Lists existing tags
 	*/
-	function tags(){
-		$this->out("Existing Tags:");  
-		$this->out(trim(shell_exec("git tag -ln")));
+	function tags($limit = 10){
+		$output = trim(shell_exec("git tag -ln"));
+		$lines = explode("\n", $output);
+		$lines = array_reverse($lines);
+		$total = count($lines);
+		if ($total > $limit) {
+			$lines = array_slice($lines, 0, $limit);
+		}
+		foreach ( $lines as $key => $val ) { 
+			$lines[$key] = "  $val"; 
+		}
+		if ($total > count($lines)) {
+			$this->out("Existing Tags: (only showing " . count($lines) . "  out of {$total})");
+		} else {
+			$this->out("Existing Tags: ({$total})");
+		}
+		$this->out(implode("\n", $lines));
+		$this->out();
+		$this->out("    cake deploy app prod ____");
 		$this->out();
 	}
 	
@@ -230,20 +253,32 @@ class DeployShell extends Shell {
 		while (empty($tag)) {
 			$tag = trim($this->in("Enter your tag"));
 		}
-		if (!empty($tag)) {
-			$message = empty($this->args) ? "Deploy Script Added Tag {$tag}" : array_shift($this->args);
-			//Are you sure this is your tag?
-			switch($this->promptYesNo("Are you sure this is your tag with message: $tag '$message'")){
-				case 'n':
-					$this->args = array();
-					return $this->tag();
-				case 'q':
-					$this->out('bye');
-					exit(1);
-			}
+		if (empty($tag)) {
+			$this->out('sorry - invalid tag (empty)');
+			exit(1);
+		}
+		// create message (default)
+		$message = empty($this->args) ? "Deploy Script Added Tag {$tag}" : array_shift($this->args);
+		$message = $this->in("Enter your message (or 'q' to quit)",'',$message);
+		while (empty($message)) {
+			$message = $this->in("Enter your message (or 'q' to quit)");
+		}
+		if ($message=='q') {
+			$this->out('bye');
+			exit(1);
+		}
+		//Are you sure this is your tag?
+		switch($this->promptYesNo("Are you sure this is your tag with message: $tag '$message'")){
+			case 'n':
+				$this->hr();
+				$this->args = array();
+				$this->tag();
+				break;
+			case 'q':
+				$this->out('bye');
+				exit(1);
 		}
 		$this->out(shell_exec("git tag -a '{$tag}' -m '$message'"));
-		
 		//Push tags?
 		switch($this->promptYesNo("Want to push your tags?")){
 			case 'y':

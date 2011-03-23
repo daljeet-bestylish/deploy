@@ -440,7 +440,13 @@ class DeployShell extends Shell {
 	* @return boolean true if the tag exists in the current git repository
 	*/
 	protected function verifyTag(){
-		return ($this->tag == trim(shell_exec("git tag | grep '{$this->tag}'")));
+		if ($this->tag == trim(shell_exec("git tag | grep '{$this->tag}'"))) {
+			return true;
+		}
+		if ($this->tag == trim(trim(trim(shell_exec("git branch -l | grep '{$this->tag}'")),'*'))) {
+			return true;
+		}
+		return false;
 	}
 	
 	

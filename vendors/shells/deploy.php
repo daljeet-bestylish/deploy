@@ -285,6 +285,11 @@ class DeployShell extends Shell {
 				$this->out(shell_exec("git push --tags"));
 				break;
 		}
+		$this->out();
+		$this->out("  cake {$this->shell} app prod {$tag}");
+		$this->out("  cake {$this->shell} app qa {$tag}");
+		$this->out("  cake {$this->shell} app dev {$tag}");
+		$this->out();
 	}
 	
 	/**

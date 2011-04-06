@@ -196,10 +196,24 @@ class DeployShell extends Shell {
 	}
 	
 	/**
+	* Tag sort by tag name
+	* @param sortby string (tag|date) tag by default
+	* @return output of git command
+	*/
+	private function git_tags($sortby = 'tag'){
+		switch($sortby){
+			case 'date':
+				return trim(shell_exec("git for-each-ref --sort=taggerdate --format='%(refname:short)\t%(subject)' refs/tags"));
+			default:
+				return trim(shell_exec("git tag -ln"));
+		}
+	}
+	
+	/**
 	* Lists existing tags
 	*/
-	function tags($limit = 10){
-		$output = trim(shell_exec("git tag -ln"));
+	function tags($limit = 10, $sortby = 'date'){
+		$output = $this->git_tags($sortby);
 		$lines = explode("\n", $output);
 		$lines = array_reverse($lines);
 		$total = count($lines);

@@ -200,13 +200,26 @@ class DeployShell extends Shell {
 	* @param sortby string (tag|date) tag by default
 	* @return output of git command
 	*/
-	private function git_tags($sortby = 'tag'){
+	private function git_tags($sortby = 'tag', $show_message = true){
 		switch($sortby){
 			case 'date':
-				return trim(shell_exec("git for-each-ref --sort=taggerdate --format='%(refname:short)\t%(subject)' refs/tags"));
+				if($show_message){
+					$command = "git for-each-ref --sort=taggerdate --format='%(refname:short)\t%(subject)' refs/tags";
+				}
+				else {
+					$command = "git for-each-ref --sort=taggerdate --format='%(refname:short)' refs/tags";
+				}
+				break;
 			default:
-				return trim(shell_exec("git tag -ln"));
+				if($show_message){
+					$command = "git tag -ln";
+				}
+				else {
+					$command = "git tag";
+				}
+				break;
 		}
+		return trim(shell_exec($command));
 	}
 	
 	/**
@@ -241,7 +254,7 @@ class DeployShell extends Shell {
 		if (empty($this->args)) {
 			// nothing entered... lets prompt for auto-tag completion
 			$this->tags();
-			$lastTag = array_pop(explode("\n", trim(shell_exec("git tag"))));
+			$lastTag = array_pop(explode("\n", $this->git_tags('date', false)));
 			if (!empty($lastTag)) {
 				$lastTagParts = explode(".", $lastTag);
 				$lastTagSuffix = array_pop($lastTagParts);

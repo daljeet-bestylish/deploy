@@ -96,10 +96,9 @@ class DeployShell extends Shell {
 	* Run the app task deploy
 	*/
 	function app(){
-		if(isset($this->DeployLogic)){
+		if (isset($this->DeployLogic)){
 			$this->DeployLogic->execute();
-		}
-		else {
+		} else {
 			$this->__errorAndExit("No Deploy Logic detected.  Please generate a deploy script by running\n\n cake deploy generate");
 		}
 	}
@@ -118,6 +117,7 @@ class DeployShell extends Shell {
 		$this->out("  cake deploy app qa v1.2         Deploy 'this application' tag 'v1.2' to the 'QA environment'");
 		$this->out("  cake deploy app dev v1.2        Deploy 'this application' tag 'v1.2' to the 'development environment'");
 		$this->out("  cake deploy tags                List the tags (git shortcut).");
+		$this->out("  cake deploy tags delete         List and promt to to delete for each tag.");
 		$this->out("  cake deploy tag                 Create the new tag, auto assigns tag (git shortcut).");
 		$this->out("  cake deploy tag v1.2            Create the new tag (git shortcut).");
 		$this->out("  cake deploy delete_tag v1.2     Deletes local and remote copy of tag (git shortcut).");
@@ -204,10 +204,10 @@ class DeployShell extends Shell {
 		switch($sortby){
 			case 'date':
 				if($show_message){
-					$command = "git for-each-ref --sort=taggerdate --format='%(refname:short)\t%(subject)' refs/tags";
+					$command = "git for-each-ref --sort=taggerdate --format='%(refname)\t%(subject)' refs/tags";
 				}
 				else {
-					$command = "git for-each-ref --sort=taggerdate --format='%(refname:short)' refs/tags";
+					$command = "git for-each-ref --sort=taggerdate --format='%(refname)' refs/tags";
 				}
 				break;
 			default:
@@ -219,27 +219,45 @@ class DeployShell extends Shell {
 				}
 				break;
 		}
-		return trim(shell_exec($command));
+		$output = trim(shell_exec($command));
+		$lines = explode("\n", $output);
+		foreach ( $lines as $i => $line ) {
+			if (strpos($line, 'refs/tags/')!==false) {
+				$lines[$i] = str_replace('refs/tags/', '', $line);
+			}
+		}
+		$lines = array_reverse($lines);
+		return $lines;
 	}
 	
 	/**
 	* Lists existing tags
 	*/
-	function tags($limit = 10, $sortby = 'date'){
-		$output = $this->git_tags($sortby);
-		$lines = explode("\n", $output);
-		$lines = array_reverse($lines);
-		$total = count($lines);
-		if ($total > $limit) {
-			$lines = array_slice($lines, 0, $limit);
-		}
-		foreach ( $lines as $key => $val ) { 
-			$lines[$key] = "  $val"; 
-		}
-		if ($total > count($lines)) {
-			$this->out("Existing Tags: (only showing " . count($lines) . "  out of {$total})");
+	function tags($limit = 10, $sortby = 'date') {
+		$lines = $this->git_tags($sortby);
+		if (in_array('delete', $this->args)) {
+			foreach ( $lines as $line ) {
+				$deleteIT = $this->promptYesNo("Delete Tag?: {$line}");
+				if ($deleteIT=='y') {
+					$parts = explode(' ', str_replace('	', ' ', $line));
+					$tag = $parts[0];
+					$this->out(shell_exec("git tag -d {$tag}"));
+					$this->out(shell_exec("git push origin :{$tag}"));
+				}
+			}
 		} else {
-			$this->out("Existing Tags: ({$total})");
+			$total = count($lines);
+			if ($total > $limit) {
+				$lines = array_slice($lines, 0, $limit);
+			}
+			foreach ( $lines as $key => $val ) {
+				$lines[$key] = "  $val";
+			}
+			if ($total > count($lines)) {
+				$this->out("Existing Tags: (only showing " . count($lines) . "  out of {$total})");
+			} else {
+				$this->out("Existing Tags: ({$total})");
+			}
 		}
 		$this->out(implode("\n", $lines));
 		$this->out();
@@ -254,7 +272,10 @@ class DeployShell extends Shell {
 		if (empty($this->args)) {
 			// nothing entered... lets prompt for auto-tag completion
 			$this->tags();
-			$lastTag = array_pop(explode("\n", $this->git_tags('date', false)));
+			$lines = $this->git_tags('date');
+			$lastTagLine = array_shift($lines);
+			$parts = explode(' ', str_replace('	', ' ', $lastTagLine));
+			$lastTag = $parts[0];
 			if (!empty($lastTag)) {
 				$lastTagParts = explode(".", $lastTag);
 				$lastTagSuffix = array_pop($lastTagParts);
@@ -273,8 +294,7 @@ class DeployShell extends Shell {
 						break;
 				}
 			}
-		} 
-		else {
+		} else {
 			$tag = trim(array_shift($this->args));
 		}
 		while (empty($tag)) {
@@ -310,6 +330,17 @@ class DeployShell extends Shell {
 		switch($this->promptYesNo("Want to push your tags?")){
 			case 'y':
 				$this->out(shell_exec("git push --tags"));
+				$this->tag = $tag;
+				if ($this->promptYesNo("Want to deploy this tag to qa?")=='y') {
+					$this->args = array('qa', $tag);
+					$this->environment = 'qa';
+					$this->app();
+				}
+				if ($this->promptYesNo("Want to deploy this tag to prod?")=='y') {
+					$this->args = array('prod', $tag);
+					$this->environment = 'prod';
+					$this->app();
+				}
 				break;
 		}
 		$this->out();

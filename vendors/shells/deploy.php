@@ -87,9 +87,15 @@ class DeployShell extends Shell {
 	* @return void
 	*/
 	function main(){
-		$this->out("Deploy the parent app to production");
-		$this->hr();
-		$this->help();
+		$cmd = array_shift($this->args);
+		if (method_exists($this->DeployLogic, $cmd)) {
+			$this->out(":App Specific Command: $cmd()");
+			$this->out();
+			$this->DeployLogic->$cmd();
+			$this->out();
+		} else {
+			$this->help();
+		}
 	}
 	
 	/**
@@ -116,17 +122,27 @@ class DeployShell extends Shell {
 		$this->out("  cake deploy app prod v1.2       Deploy 'this application' tag 'v1.2' to the 'production  environment'");
 		$this->out("  cake deploy app qa v1.2         Deploy 'this application' tag 'v1.2' to the 'QA environment'");
 		$this->out("  cake deploy app dev v1.2        Deploy 'this application' tag 'v1.2' to the 'development environment'");
+		$this->out("  cake deploy app dev BRANCH      Deploy 'this application' branch 'BRANCH' to the 'development environment'");
+		$this->out("  cake deploy app dev-NAME        Deploy 'this application' branch 'dev-NAME' to the 'dev-NAME' (requires configuration on deploytasks)");
 		$this->out("  cake deploy tags                List the tags (git shortcut).");
 		$this->out("  cake deploy tags delete         List and promt to to delete for each tag.");
 		$this->out("  cake deploy tag                 Create the new tag, auto assigns tag (git shortcut).");
 		$this->out("  cake deploy tag v1.2            Create the new tag (git shortcut).");
 		$this->out("  cake deploy delete_tag v1.2     Deletes local and remote copy of tag (git shortcut).");
 		$this->out("  cake deploy sync_tags           Sync local tags to remote tags (git shortcut).");
-		$this->out("Get Started:");
-		$this->out("  cake deploy generate            Generate the DeployLogicTask to deploy the App.");
-		$this->out("                                  You will then need to edit and setup your deploy script.");
+		if (method_exists($this->DeployLogic, 'help')) {
+			$this->out();
+			$this->out("App Specific Help");
+			$this->out();
+			$this->DeployLogic->help();
+			$this->out();
+		} else {
+			$this->out();
+			$this->out("Get Started:");
+			$this->out("  cake deploy generate            Generate the DeployLogicTask to deploy the App.");
+			$this->out("                                  You will then need to edit and setup your deploy script.");
+		}
 		$this->tags();
-		
 	}
 	
 	/**
@@ -360,22 +376,26 @@ class DeployShell extends Shell {
 		if(empty($this->args)){
 			$this->__errorAndExit('No arguments passed, please specify an environment and tag');
 		}
-		
+		if (isset($this->DeployLogicTask->environments)) {
+			$this->environments = $this->DeployLogicTask->environments;
+		}
 		//Get the environment
 		$environment_key = array_shift($this->args);
-		if(!$environment_key){
+		if (!$environment_key) {
 			$this->__errorAndExit('Please specify an environment.');
-		}
-		if(isset($this->environments[$environment_key])){
+		} elseif (isset($this->environments[$environment_key])) {
 			$this->environment = $this->environments[$environment_key];
-		}
-		else {
+		} elseif (in_array($environment_key, $this->environments)) {
+			$this->environment = $environment_key;
+		} else {
 			$this->__errorAndExit("$environment_key is not a valid environment to deploy to.");
 		}
-		
 		//Get the Tag
 		$this->tag = array_shift($this->args);
-		if(!$this->tag){
+		if (!$this->tag && substr($this->environment, 0, 4)=='dev-') {
+			$this->tag = $this->environment;
+		}
+		if (!$this->tag) {
 			$this->__errorAndExit('Please specify a tag.');
 		}
 		

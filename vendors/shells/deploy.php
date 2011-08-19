@@ -217,6 +217,10 @@ class DeployShell extends Shell {
 	* @return output of git command
 	*/
 	private function git_tags($sortby = 'tag', $show_message = true){
+		if (!isset($this->fetchedTags) || empty($this->fetchedTags)) {
+			$this->out(shell_exec("git fetch --tags origin"));
+			$this->fetchedTags = true;
+		}
 		switch($sortby){
 			case 'date':
 				if($show_message){

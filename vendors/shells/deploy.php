@@ -189,12 +189,18 @@ class DeployShell extends Shell {
 		
 		switch($this->promptYesNo("Are you sure you want to delete {$this->tag }?")){
 			case 'y':
-				$this->out(shell_exec("git tag -d {$this->tag}"));
-				$this->out(shell_exec("git push origin :{$this->tag}"));
+				$this->git_delete_tag($this->tag);
 				break;
 		}
 	}
 	
+	/**
+	* private helper method to delete a tag.
+	*/
+	private function git_delete_tag($tag){
+		$this->out(shell_exec("git tag -d {$tag}"));
+		$this->out(shell_exec("git push origin :{$tag}"));
+	}
 	
 	/**
 	* Go through the local tags, delete them all and then pull in from remote.
@@ -261,8 +267,7 @@ class DeployShell extends Shell {
 				if ($deleteIT=='y') {
 					$parts = explode(' ', str_replace('	', ' ', $line));
 					$tag = $parts[0];
-					$this->out(shell_exec("git tag -d {$tag}"));
-					$this->out(shell_exec("git push origin :{$tag}"));
+					$this->git_delete_tag($tag);
 				}
 			}
 		} else {

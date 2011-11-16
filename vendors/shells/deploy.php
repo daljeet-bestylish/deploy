@@ -361,6 +361,11 @@ class DeployShell extends Shell {
 					$this->environment = 'qa';
 					$this->app();
 				}
+				if ($this->promptYesNo("Want to deploy this tag to dev?")=='y') {
+					$this->args = array('dev', $tag);
+					$this->environment = 'dev';
+					$this->app();
+				}
 				if ($this->promptYesNo("Want to deploy this tag to prod?")=='y') {
 					$this->args = array('prod', $tag);
 					$this->environment = 'prod';

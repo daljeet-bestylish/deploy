@@ -431,7 +431,7 @@ class DeployShell extends Shell {
 	*/
 	function ssh_open($server, $user, $pass, $port = 22){
 		if(!function_exists("ssh2_connect")){
-			$this->__errorAndExit("function ssh2_connect doesn't exit.  Run sudo apt-get install libssh2-1-dev libssh2-php");
+			$this->__errorAndExit("function ssh2_connect doesn't exit.  Run \n\n   Ubuntu: sudo apt-get install libssh2-1-dev libssh2-php\n\n    Mac: sudo port install php5-ssh2");
 		}
 		
 		if($server == 'server.example.com'){

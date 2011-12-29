@@ -78,7 +78,7 @@ class DeployShell extends Shell {
 	/**
 	* Dynamically load all tasks that are in the app/vendors/shell/tasks directory
 	*/
-	function initialize() {
+	public function initialize() {
 		$this->tasksPath = APP . 'vendors' .  DS . 'shells' . DS .'tasks' . DS;
 		$this->Folder = new Folder();
 		$this->Folder->cd($this->tasksPath);
@@ -94,7 +94,7 @@ class DeployShell extends Shell {
 	* Default action.
 	* @return void
 	*/
-	function main() {
+	public function main() {
 		$cmd = array_shift($this->args);
 		if (method_exists($this->DeployLogic, $cmd)) {
 			$this->out(":App Specific Command: $cmd()");
@@ -108,7 +108,7 @@ class DeployShell extends Shell {
 	/**
 	* Run the app task deploy
 	*/
-	function app() {
+	public function app() {
 		if (!isset($this->DeployLogic)) {
 			$this->__errorAndExit("No Deploy Logic detected.\n\nPlease generate a deploy script by running\n\n  cake deploy generate");
 		}
@@ -133,7 +133,7 @@ class DeployShell extends Shell {
 	* Show the help menu
 	* @return void
 	*/
-	function help() {
+	public function help() {
 		$this->out("Deploy Help");
 		$this->hr();
 		$this->out("Usage: cake deploy app <environment> <tag>");
@@ -157,17 +157,17 @@ class DeployShell extends Shell {
 		$this->out("  cake deploy sync_tags           Sync local tags to remote tags (git shortcut).");
 		$this->out("Wizard: to make tag and deploy to prod on all sites:");
 		$this->out("  cake deploy tag -site all -env prod");
-		if (method_exists($this->DeployLogic, 'help')) {
-			$this->out();
-			$this->out("App Specific Help");
-			$this->out();
-			$this->DeployLogic->help();
-			$this->out();
-		} else {
+		if (!isset($this->DeployLogic) || !is_object($this->DeployLogic)) {
 			$this->out();
 			$this->out("Get Started:");
 			$this->out("  cake deploy generate            Generate the DeployLogicTask to deploy the App.");
 			$this->out("                                  You will then need to edit and setup your deploy script.");
+		} elseif (is_callable(array('DeployLogicTask', 'custom_help'))) {
+			$this->out();
+			$this->out("App Specific Help");
+			$this->out();
+			$this->DeployLogic->custom_help();
+			$this->out();
 		}
 		$this->tags();
 	}
@@ -175,7 +175,7 @@ class DeployShell extends Shell {
 	* Genearte a new app deploy task.
 	* @return void
 	*/
-	function generate() {
+	public function generate() {
 		$app_name = 'deploy_logic';
 		$class = Inflector::classify($app_name);
 		$content = $this->__generateTemplate('task', array('class' => $class, 'name' => $app_name));
@@ -195,7 +195,7 @@ class DeployShell extends Shell {
 	/**
 	* Delete the inputed tag from local and remote
 	*/
-	function delete_tag() {
+	public function delete_tag() {
 		if (empty($this->args)) {
 			$this->out("No tag specified to delete.");
 			$this->tags();
@@ -221,7 +221,7 @@ class DeployShell extends Shell {
 	/**
 	* Go through the local tags, delete them all and then pull in from remote.
 	*/
-	function sync_tags() {
+	public function sync_tags() {
 		$tags = $this->getTagsAsArray();
 		if ($this->promptContinue("Your local tags will by synced with the remote.  This process is irreversible. Are you sure?")) {
 			if (!empty($tags)) {
@@ -273,7 +273,7 @@ class DeployShell extends Shell {
 	/**
 	* Lists existing tags
 	*/
-	function tags($limit = 10, $sortby = 'date') {
+	public function tags($limit = 10, $sortby = 'date') {
 		$lines = $this->git_tags($sortby);
 		if (in_array('delete', $this->args)) {
 			foreach ( $lines as $line ) {
@@ -305,7 +305,7 @@ class DeployShell extends Shell {
 	/**
 	* create a new tag
 	*/
-	function tag() {
+	public function tag() {
 		if (empty($this->args)) {
 			// nothing entered... lets prompt for auto-tag completion
 			$this->tags();
@@ -396,7 +396,7 @@ class DeployShell extends Shell {
 	* - verify the tag
 	* @return bool
 	*/
-	function beforeDeploy() {
+	public function beforeDeploy() {
 		if (isset($this->DeployLogicTask->environments)) {
 			$this->environments = $this->DeployLogicTask->environments;
 		}
@@ -434,7 +434,7 @@ class DeployShell extends Shell {
 	* @param string port to use to conenct to server with
 	* @return void
 	*/
-	function ssh_open($server, $user, $pass, $port = 22) {
+	public function ssh_open($server, $user, $pass, $port = 22) {
 		if (!function_exists("ssh2_connect")) {
 			$this->__errorAndExit("function ssh2_connect doesn't exit.  Run \n\n   Ubuntu: sudo apt-get install libssh2-1-dev libssh2-php\n\n    Mac: sudo port install php5-ssh2");
 		}
@@ -455,7 +455,7 @@ class DeployShell extends Shell {
 	* @param boolean get stderr instead of stdout stream
 	* @return mixed result of command.
 	*/
-	function ssh_exec($cmd, $error = false) {
+	public function ssh_exec($cmd, $error = false) {
 		if (!$this->connection) {
 			$this->__errorAndExit("No open connection detected.");
 		}
@@ -490,13 +490,13 @@ class DeployShell extends Shell {
 	* @param string path (without cd)
 	* @return void
 	*/
-	function ssh_setpath($path) {
+	public function ssh_setpath($path) {
 		$this->path = $path;
 	}
 	/**
 	* Close the current connection
 	*/
-	function ssh_close() {
+	public function ssh_close() {
 		if ($this->connection) {
 			$this->ssh_exec("exit");
 		}

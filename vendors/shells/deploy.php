@@ -417,7 +417,7 @@ class DeployShell extends Shell {
 		}
 		$this->tag = $this->getParam($this->tag, array(
 			'prompt' => "Please specify a tag [v#.#.#] or branch [master, dev, dev-alan, feature-#-desc, etc...] to deploy",
-			'valuePregMatchPattern' => "#^((v[0-9\.]+)|((dev|qa|bug|feature|misc)[a-zA-Z0-9\.\-\_]*))$#",
+			'valuePregMatchPattern' => "#^((v[0-9\.]+)|((master|dev|qa|prod|deploy|bug|feature|misc)[a-zA-Z0-9\.\-\_]*))$#",
 			'default' => '',
 			));
 		$this->out(">>> tag or branch: {$this->tag}");

@@ -82,6 +82,9 @@ class SpTask extends DeployShell {
     	//Updated submodules to match checked out tag
     	$this->ssh_exec("git submodule update");
 
+    	//Update each local file's timestamp to the time it was last modified in git
+    	$this->ssh_exec("/usr/local/bin/git-set-file-times");
+
     	//Give it to cakedeployer
     	$this->ssh_exec("chown -R cakedeployer:www-data .");
 

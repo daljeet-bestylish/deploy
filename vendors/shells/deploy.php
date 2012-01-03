@@ -355,13 +355,14 @@ class DeployShell extends Shell {
 		}
 		$this->out(shell_exec("git tag -a '{$tag}' -m '$message'"));
 		//Push tags?
-		if ($this->promptYesNo("Want to push your tags to [dev] and/or [qa] and/or [prod]?")) {
+		if ($this->promptYesNo("Everything alright? (want to push your tags to origin?)")) {
 			$init_defaultToYes = $this->defaultToYes;
 			$this->out(shell_exec("git push --tags"));
 			$this->tag = $tag;
 			if ($this->promptYesNo("Want to deploy this tag to [dev]? (no further confirmations)")=='y') {
 				$this->args = array('dev', $tag);
 				$this->environment = 'dev';
+				$this->tag = $tag;
 				$this->defaultToYes = true;
 				$this->app();
 				$this->defaultToYes = $init_defaultToYes;
@@ -369,6 +370,7 @@ class DeployShell extends Shell {
 			if ($this->promptYesNo("Want to deploy this tag to [qa]? (no further confirmations)")=='y') {
 				$this->args = array('qa', $tag);
 				$this->environment = 'qa';
+				$this->tag = $tag;
 				$this->defaultToYes = true;
 				$this->app();
 				$this->defaultToYes = $init_defaultToYes;
@@ -376,6 +378,7 @@ class DeployShell extends Shell {
 			if ($this->promptYesNo("Want to deploy this tag to [prod]? (no further confirmations)")=='y') {
 				$this->args = array('prod', $tag);
 				$this->environment = 'prod';
+				$this->tag = $tag;
 				$this->defaultToYes = true;
 				$this->app();
 				$this->defaultToYes = $init_defaultToYes;

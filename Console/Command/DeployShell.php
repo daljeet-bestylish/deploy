@@ -27,7 +27,9 @@ class DeployShell extends Shell {
 	/**
 	* Deployable apps, as tasks, this is dynamically loaded
 	*/
-	var $tasks = array();
+	var $tasks = array(
+		'DeployLogic'
+	);
 	
 	/**
 	* environment verbs to directory names
@@ -72,13 +74,6 @@ class DeployShell extends Shell {
 	*/
 	function initialize(){
 		$this->tasksPath = APP . 'vendors' .  DS . 'shells' . DS .'tasks' . DS;
-		$this->Folder = new Folder();
-		$this->Folder->cd($this->tasksPath);
-		foreach($this->Folder->find() as $task){
-			if($task == 'deploy_logic.php'){
-				$this->tasks[] = Inflector::camelize(str_replace(".php", "", $task));
-			}
-		}
 		parent::initialize();
 	}
 	

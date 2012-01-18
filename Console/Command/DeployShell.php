@@ -21,7 +21,6 @@
 *
 * You should see 'ssh2', if so, you're good to go!
 */
-App::import('Core','Folder');
 class DeployShell extends Shell {
 	
 	/**
@@ -97,11 +96,8 @@ class DeployShell extends Shell {
 	* Run the app task deploy
 	*/
 	function app(){
-		if (isset($this->DeployLogic)){
-			$this->DeployLogic->execute();
-		} else {
-			$this->__errorAndExit("No Deploy Logic detected.  Please generate a deploy script by running\n\n cake deploy generate");
-		}
+		$this->DeployLogic->execute();
+		//$this->__errorAndExit("No Deploy Logic detected.  Please generate a deploy script by running\n\n cake deploy generate");
 	}
 	
 	/**

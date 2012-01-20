@@ -30,6 +30,8 @@ class DeployShell extends Shell {
 		'DeployLogic'
 	);
 	
+	public $shell = null;
+	
 	/**
 	* environment verbs to directory names
 	*/

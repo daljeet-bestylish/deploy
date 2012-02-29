@@ -386,10 +386,11 @@ class DeployShell extends Shell {
 		} else {
 			$this->out();
 			$this->out("Great -- if you want to push this tag out, use:");
+			$this->out("   git push origin {$tag}");
 			$this->out();
-			$this->out("  cake {$this->shell} app prod {$tag}");
-			$this->out("  cake {$this->shell} app qa {$tag}");
-			$this->out("  cake {$this->shell} app dev {$tag}");
+			$this->out("  ./cake {$this->shell} app prod {$tag}");
+			$this->out("  ./cake {$this->shell} app qa {$tag}");
+			$this->out("  ./cake {$this->shell} app dev {$tag}");
 		}
 		$this->out();
 	}

@@ -422,7 +422,15 @@ class DeployShell extends Shell {
 	* @param string port to use to conenct to server with
 	* @return void
 	*/
-	function ssh_open($server, $user, $pass, $port = 22){
+	function ssh_open($server, $user, $pass, $port = 22, $methods = array()){
+		$methods = array_merge(array(
+			'client_to_server' => array(
+				'crypt' => '3des-cbc',
+				'comp' => 'none'),
+			'server_to_client' => array(
+				'crypt' => 'aes256-cbc,aes192-cbc,aes128-cbc',
+				'comp' => 'none')
+		), $methods);
 		if(!function_exists("ssh2_connect")){
 			$this->__errorAndExit("function ssh2_connect doesn't exit.  Run \n\n   Ubuntu: sudo apt-get install libssh2-1-dev libssh2-php\n\n    Mac: sudo port install php5-ssh2");
 		}
@@ -431,7 +439,7 @@ class DeployShell extends Shell {
 			$this->__errorAndExit("Please fill in the deploy() function in your new app task");
 		}
 		
-		$this->connection = ssh2_connect($server, $port);
+		$this->connection = ssh2_connect($server, $port, $methods);
 		
 		if(!$this->connection){
 			$this->__errorAndExit("Unable to connect to $server");
